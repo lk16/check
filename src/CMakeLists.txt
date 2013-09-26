@@ -19,11 +19,10 @@ set(OPTIMIZING_FLAGS
 
 set(CMAKE_CXX_FLAGS 
   #${OPTIMIZING_FLAGS}
-  #${DEBUG_FLAGS} 
+  ${DEBUG_FLAGS} 
 ) 
 
 SET(objects
-  bots/bot_ali.cpp
   game/board.cpp
   game/game_control.cpp
   gui_base/clickable_image.cpp
