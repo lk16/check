@@ -8,8 +8,6 @@
 #include <gtkmm.h>
 #include <gtkmm/stock.h>
 
-#include "bots/bot_ali.hpp"
-
 #include "game/game_control.hpp"
 #include "game/util.hpp"
 #include "game/board.hpp"

@@ -1,10 +1,10 @@
 #include "main_window.hpp"
 
 main_window::main_window():
-  table(8,8),
+  table(10,10),
   control(this),
   aspect_frame("",0.5,0.5,1),
-  fields(8,std::vector<clickable_image*>(8)),
+  fields(10,std::vector<clickable_image*>(10)),
   ui_file(UI_PATH + "menus.xml")
 {
   init_ui();
@@ -71,9 +71,9 @@ void main_window::init_ui(){
     vbox.pack_start(*menubar,Gtk::PACK_SHRINK);
   }
   
-  for(int y=0;y<8;y++){ 
-    for(int x=0;x<8;x++){
-      fields[x][y]=new clickable_image(this,y*8+x,IMAGE_PATH + "empty.png");
+  for(int y=0;y<10;y++){ 
+    for(int x=0;x<10;x++){
+      fields[x][y]=new clickable_image(this,y*10+x,IMAGE_PATH + "brown.png");
       table.attach(*fields[x][y],x,x+1,y,y+1);
     }
   }
@@ -152,6 +152,7 @@ void main_window::update_fields()
 {
   const board *b;
   int x,y;
+  int index = 0;
   std::string imagefile;
   
   b = &control.current;
@@ -159,38 +160,39 @@ void main_window::update_fields()
    
   for(y=0;y<10;y++){
     for(x=0;x<10;x++){
-      if((x%2) ^ (y%2)){
+      if((x%2==1) ^ (y%2==0)){
         imagefile = "yellow.png";
       }
-      else if(b->discs[WHITE].test(y*10+x)){
-        if(b->is_king[WHITE]){
-          imagefile = "brown_white_king.png";
-        }
-        else{
-          imagefile = "brown_white.png";
-        }
-      }
-      else if(b->discs[BLACK].test(y*10+x)){
-        if(b->is_king[BLACK]){
-          imagefile = "brown_black_king.png";
-        }
-        else{
-          imagefile = "brown_black.png";
-        }
-      }
-      /*else if(b->is_valid_move(y*8+x)){
-        imagefile = "move.png";
-      }*/
       else{
-        imagefile = "brown.png";
+        if(b->discs[WHITE].test(index)){
+          if(b->is_king[WHITE]){
+            imagefile = "brown_white_king.png";
+          }
+          else{
+            imagefile = "brown_white.png";
+          }
+        }
+        else if(b->discs[BLACK].test(index)){
+          if(b->is_king[BLACK]){
+            imagefile = "brown_black_king.png";
+          }
+          else{
+            imagefile = "brown_black.png";
+          }
+        }
+        else{
+          imagefile = "brown_empty.png";
+        }
+        index++;
       }
+      
       table.remove(*fields[x][y]);
       delete fields[x][y];
-      fields[x][y] = new clickable_image(this,y*8+x,IMAGE_PATH + imagefile);
+      fields[x][y] = new clickable_image(this,index-1,IMAGE_PATH + imagefile);
       table.attach(*fields[x][y],x,x+1,y,y+1);
-      table.show_all_children();
     }
   }
+  table.show_all_children();
 }
 
 void main_window::update_status_bar(const std::string& text)

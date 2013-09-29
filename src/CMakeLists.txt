@@ -27,7 +27,9 @@ SET(objects
   game/game_control.cpp
   gui_base/clickable_image.cpp
   gui/main_window.cpp
+  gui/settings_dialog.cpp
   main/check.cpp
+  game/move.cpp
 )
 
 

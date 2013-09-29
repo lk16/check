@@ -12,8 +12,10 @@ clickable_image::clickable_image(main_window* par, int _field_id, const std::str
 
 bool clickable_image::on_button_press_event(GdkEventButton* _event)
 {
-  parent->control.on_human_do_move(field_id);
-  _event = NULL; /* prevent compiler complaining */  
+  (void)_event;
+  
+  //parent->control.on_human_do_move(field_id);
+  std::cout << "Field " << field_id << " was clicked\n";
   return true;
 }
 
