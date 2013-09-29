@@ -3,43 +3,45 @@
 
 #include <bitset>
 
+enum{
+  ROW_L = 1, // refers to rows 0,2,4,6,8
+  ROW_R = 0  // refers to rows 1,3,5,7,9
+};
+
+enum{
+  DIR_UL = 0,
+  DIR_UR = 1,
+  DIR_DL = 2,
+  DIR_DR = 3
+};
+
+
+
 // http://dezlaren.home.xs4all.nl/opgaven/BordNummering.gif
 //  EVERYTHING -1 ^^^^
 struct move{
   
-  // multiply by (-1) when trying to do a move for white
-  static int walk[3];
-  static int capture[4];
+  // has only set bits in rows 1,3,5,7,9 (using zero-based row counting)
+  static std::bitset<50> is_left;
   
-  static std::bitset<50> walk_possible[3];
-  static std::bitset<50> capture_possible[4];
-
-  static void init(){
-    move::walk[0] = 4;
-    move::walk[1] = 5;
-    move::walk[2] = 6;
-    
-    move::capture[0] = -11;
-    move::capture[0] = - 9;
-    move::capture[0] =   9;
-    move::capture[0] =  11;
-    
-    for(int p=0;p<50;p++){
-      int my_row = p/5;
-      for(int i=0;i<3;i++){
-        int test_row = (p+walk[i])/5;
-        if((test_row==my_row+1) && (test_row<10)){
-          move::walk_possible[i].set(p);
-        }
-      }
-      for(int i=0;i<4;i++){
-        int test_row = (p+capture[i])/5;
-        if((test_row==my_row+2) && (test_row<10) && (test_row>=0)){
-          move::capture_possible[i].set(p);
-        }
-      }
-    }
-  }
+  /// all data for BLACK, multiply by (-1) for data on WHITE
+  
+  
+  // contains difference in index of walk in any direction, per row line type
+  // example use: move::diff_walk[is_left.test(0)][DIR_DR];
+  static int diff_walk[2][4];
+  
+  // contains difference in index of capturing in any direction
+  // row line types do not matter
+  static int diff_capture[4];
+  
+  // can i walk in this direction from this field?
+  // example use: move::walk_possible[DIR_UL].test(0)
+  static std::bitset<50> walk_possible[4];
+  
+  
+  // initialize all static move values
+  static void init();
   
 };
 

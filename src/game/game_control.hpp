@@ -25,7 +25,7 @@ struct game_control{
   void on_undo();
   void on_redo();
   
-  void on_human_do_move(int from,int to);
+  void on_human_click(int field_id);
   void on_bot_do_move();
   void on_any_move();
   
@@ -40,6 +40,7 @@ struct game_control{
   board current;
   
   std::stack<board> undo_stack,redo_stack;
+  int previous_clicked_field;
   
 };
 

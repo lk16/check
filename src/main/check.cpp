@@ -1,9 +1,17 @@
 #include <gtkmm.h>
 
 #include "gui/main_window.hpp"
+#include "game/move.hpp"
+
 
 void run_debug(){
   board b;
+  b.reset();
+  b.show();
+  move::init();
+  for(int i=0;i<4;i++){
+    show_bitset(move::walk_possible[i]);
+  }
 }
 
 

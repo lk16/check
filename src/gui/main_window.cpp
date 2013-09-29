@@ -156,11 +156,11 @@ void main_window::update_fields()
   std::string imagefile;
   
   b = &control.current;
-  
    
   for(y=0;y<10;y++){
     for(x=0;x<10;x++){
-      if((x%2==1) ^ (y%2==0)){
+      bool is_yellow = ((x%2==1) ^ (y%2==0));
+      if(is_yellow){
         imagefile = "yellow.png";
       }
       else{
@@ -183,12 +183,18 @@ void main_window::update_fields()
         else{
           imagefile = "brown_empty.png";
         }
-        index++;
       }
+      
       
       table.remove(*fields[x][y]);
       delete fields[x][y];
-      fields[x][y] = new clickable_image(this,index-1,IMAGE_PATH + imagefile);
+      if(is_yellow){
+        fields[x][y] = new clickable_image(this,-1,IMAGE_PATH + imagefile);
+      }
+      else{
+        fields[x][y] = new clickable_image(this,index,IMAGE_PATH + imagefile);
+        index++;
+      }
       table.attach(*fields[x][y],x,x+1,y,y+1);
     }
   }

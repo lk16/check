@@ -5,6 +5,7 @@ game_control::game_control(main_window* _mw):
   mw(_mw)
 {
   bot[WHITE] = bot[BLACK] = NULL;
+  previous_clicked_field = -1;
   Glib::signal_timeout().connect(sigc::mem_fun(*this,&game_control::timeout_handler),200);
 }
 
@@ -33,17 +34,39 @@ color game_control::turn() const
 }
 
 
-void game_control::on_human_do_move(int from,int to)
+void game_control::on_human_click(int field_id)
 {
   if(bot[turn()]){
+    // it's the bots turn! discard click
     return;
   }
-
+  if(field_id==-1){
+    // this is a yellow field: discard click
+    return;
+  }
+  if(previous_clicked_field==-1){
+    // if this is the fist click
+    if(current.discs[current.turn].test(field_id)){
+      // if this field has a disc of my color
+      previous_clicked_field = field_id;
+    }
+    return;
+  }
+  int from = previous_clicked_field;
+  int to = field_id;
  
- if(current.is_valid_move(from,to)){
+  // this is the second click
+  
+  // is this a valid move?
+  if(current.is_valid_move(from,to)){
+    // yes: do move
     undo_stack.push(current);
     current.do_move(from,to,&current);
     on_any_move();
+  }
+  else{
+    // no: mark this as click as previous_clicked_field
+    previous_clicked_field = field_id;
   }
 }
 
@@ -175,6 +198,9 @@ void game_control::add_bot(color _c, int d,int wld,int pd)
   if(bot[_c]){
     delete bot[_c];
   }
+  (void)d;
+  (void)wld;
+  (void)pd;
   //bot[_c] = new bot_ali(_c,d,wld,pd);
 }
 

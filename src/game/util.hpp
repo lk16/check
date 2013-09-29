@@ -110,17 +110,29 @@ inline std::string big_number(long long x){
   return ss.str();
 }
 
-inline void show_bitset(const std::bitset<64>& bs){
+inline void show_bitset(const std::bitset<50>& bs){
   int x,y;
-  std::cout << "+-----------------+\n";
-  for(y=0;y<8;y++){
+  int index = 0;
+  /* top line */
+  std::cout << "+---------------------+\n";
+  
+  /* middle */
+  for(y=0;y<10;y++){
     std::cout << "| ";
-    for(x=0;x<8;x++){
-      std::cout << (bs.test(y*8+x) ? "@ " : "  ");
+    for(x=0;x<10;x++){
+      if((x%2==1) ^ (y%2==0)){
+        std::cout << "  ";
+        continue;
+      }
+      
+      std::cout << (bs.test(index) ? "@ " : "  ");
+      index++;
     }
     std::cout << "|\n";
   }
-  std::cout << "+-----------------+\n";
+  
+  /* bottom line */
+  std::cout << "+---------------------+\n";
 }
 
 // returns 0 if ul==0ul, returns 1 + least significant bit otherwise
