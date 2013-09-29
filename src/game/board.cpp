@@ -31,38 +31,12 @@ void board::do_move(int from,int to, board* out) const
 
 void board::get_children(board* out,int* move_count) const
 {
-  
-  *move_count = 0;
-  (void)out;
-  
-  std::bitset<50> moveable_discs;
-  std::bitset<50> capturing_discs;
-  std::bitset<50> any_disc = discs[BLACK] | discs[WHITE];
-  std::bitset<50> my_kings;
-  if(turn==WHITE){
-    my_kings = discs[WHITE] & is_king;
-    // do i have a king?
-    if(my_kings.any()){
-      // yes, i have a king!
-      
-      NOT_IMPLEMENTED;
-      CRASH;
-      
-    }
-      
-      
-    for(int i=0;i<4;i++){
-      
-      
-      
-      // for all discs of my color
-      // is capture in this direction possible, capture_possible[i]
-      // is there an empty field at my index + move::capture[i]
-      // is there a disc to capture?
-    
-    }
-      
-      
+  int max_streak;
+  get_max_king_capture_streak(out,move_count,&max_streak);
+  if(max_streak==0){
+    get_max_disc_capture_streak(out,move_count,&max_streak);
+    if(max_streak==0){
+      get_all_children(out,move_count);
     }
   }
 }
@@ -107,3 +81,10 @@ void board::show() const
   /* bottom line */
   std::cout << "+---------------------+\n";
 }
+
+void board::get_max_king_capture_streak(board* out, int* move_count, int* max_streak) const
+{
+  NOT_IMPLEMENTED;
+  *max_streak = *move_count = 0;
+}
+

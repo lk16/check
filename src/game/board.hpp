@@ -46,18 +46,21 @@ struct board{
   
   /// out will point to an array of boards which arethe current board after doing
   /// all different move sequences from the current board with a king 
-  /// resulting in the maximum possible capture streak
+  /// resulting in the maximum possible capture streak >=1
   /// number will contain the number of found boards
-  void get_max_king_capture_streak(board* out,int number) const;
+  void get_max_king_capture_streak(board* out,int* move_count,int* max_streak) const;
   
   /// out will point to an array of boards which arethe current board after doing
   /// all different move sequences from the current board with a normal disc 
-  /// resulting in the maximum possible capture streak
+  /// resulting in the maximum possible capture streak >=1
   /// number will contain the number of found boards
-  void get_max_disc_capture_streak(board* out,int number) const;
+  void get_max_disc_capture_streak(board* out,int* move_count,int* max_streak) const;
   
+  /// puts ALL children in out
+  /// number will contain the number of found boards
+  void get_all_children(board* out,int* move_count) const;
   
-  /// prints this to standard output, mark moves for current turn with '.'
+  /// prints board state to stdout
   void show() const;
   
 };
