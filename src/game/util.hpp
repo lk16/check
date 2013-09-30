@@ -12,6 +12,9 @@
 
 #define LOCATION __FILE__ << ':' << __LINE__ << '\t'
 
+#define BIT_SHIFT(var,shift) (((shift)>0) ? ((var) << (shift)) : ((var) >> (-(shift))))
+
+
 #ifndef NDEBUG
 
   #define SHOW_VAR(a) std::cout << LOCATION << #a << " = " << (a) << std::endl 

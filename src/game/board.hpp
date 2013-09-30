@@ -13,7 +13,7 @@
 
 struct board{
   std::bitset<50> discs[2];
-  std::bitset<50> is_king;
+  std::bitset<50> is_king[2];
   color turn;
     
   /// does NOTHING; call reset() to initialize
@@ -30,6 +30,9 @@ struct board{
   
   /// resets the board to starting position
   void reset();
+  
+  /// returns a bitset with only bits corresponding to empty fields set
+  std::bitset<50> get_empty_fields() const;
   
   /// checks whether for *this and this->turn, field_id is a valid move
   /// WARNING: NOT EFFICIENT
@@ -76,7 +79,8 @@ inline void board::reset(){
   /* wipe all discs of the board */
   discs[BLACK].reset();
   discs[WHITE].reset();
-  is_king.reset();
+  is_king[BLACK].reset();
+  is_king[WHITE].reset();
   
   /* put starting pieces on board */
   for(int i=0;i<20;i++){
@@ -100,7 +104,8 @@ inline board& board::operator=(const board& b)
 {
   discs[BLACK] = b.discs[BLACK];
   discs[WHITE] = b.discs[WHITE];
-  is_king = b.is_king;
+  is_king[BLACK] = b.is_king[BLACK];
+  is_king[WHITE] = b.is_king[WHITE];
   turn = b.turn;
   return *this;
 }
@@ -110,9 +115,16 @@ inline bool board::operator==(const board& b) const
   return true
     && b.discs[BLACK] == discs[BLACK]
     && b.discs[WHITE] == discs[WHITE]
-    && b.is_king == is_king
+    && b.is_king[BLACK] == is_king[BLACK]
+    && b.is_king[WHITE] == is_king[WHITE]
     && b.turn==turn;
 }
+
+inline std::bitset<50> board::get_empty_fields() const
+{
+  return ~(discs[BLACK] | discs[WHITE] | is_king[BLACK] | is_king[WHITE]);
+}
+
 
 
 #endif

@@ -7,11 +7,18 @@
 void run_debug(){
   board b;
   b.reset();
+  b.turn = BLACK;
   b.show();
-  move::init();
-  for(int i=0;i<4;i++){
-    show_bitset(move::walk_possible[i]);
+  
+  board children[100];
+  int child_count;
+  
+  b.get_all_children(children,&child_count);
+  for(int i=0;i<child_count;i++){
+    children[i].show();
   }
+  
+  
 }
 
 
@@ -21,6 +28,10 @@ void run_debug(){
 int main(int argc,char **argv){
   Gtk::Main kit(argc,argv);
   main_window window;
+  
+  // this is ugly, but at least it won't be forgotten
+  move::init();
+  
   
   if(argc>=2){
     std::string argv1(argv[1]);

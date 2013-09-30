@@ -174,15 +174,11 @@ void game_control::on_game_ended()
 
 bool game_control::timeout_handler()
 {
-  int child_count;
+  /*int child_count;
   current.get_children(NULL,&child_count);
   if(child_count==0){
-    board copy(current);
-    copy.get_children(NULL,&child_count);
-    if(child_count==0){
-      return true;
-    }
-  }
+    return true;
+  }*/
   if(bot[turn()]){
     mw->update_status_bar("I'm thinking...");
     on_bot_do_move();  
