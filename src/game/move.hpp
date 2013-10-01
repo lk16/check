@@ -15,8 +15,6 @@ struct move{
   // has only set bits in rows 1,3,5,7,9 (using zero-based row counting)
   static std::bitset<50> is_left;
   
-  /// all data for BLACK, multiply by (-1) for data on WHITE
-  
   // WARNING: up in index is down on the board !!
   // bitsets for allowed difference in index to get to a "neighbor field"
                                 // color  left/right
@@ -28,7 +26,13 @@ struct move{
   static std::bitset<50> down5; // white  both  
   static std::bitset<50> down6; // white  left
   
-      
+  static std::bitset<50> border_top;
+  static std::bitset<50> border_bottom;
+  static std::bitset<50> border_left;
+  static std::bitset<50> border_right;
+  
+
+
   // initialize all static move values
   static void init();
   

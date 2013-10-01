@@ -170,10 +170,10 @@ void main_window::update_fields()
         else if(b->discs[BLACK].test(index)){
           imagefile = "brown_black.png";
         }
-        else if(b->is_king[WHITE].test(index)){
+        else if(b->kings[WHITE].test(index)){
           imagefile = "brown_white_king.png";
         }
-        else if(b->is_king[BLACK].test(index)){
+        else if(b->kings[BLACK].test(index)){
           imagefile = "brown_black_king.png";
         }
         else{

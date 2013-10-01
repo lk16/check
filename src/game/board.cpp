@@ -61,14 +61,14 @@ void board::show() const
       else if(discs[WHITE].test(index)){
         std::cout << "\033[34;1mo\033[0m ";
       }
-      else if(is_king[BLACK].test(index)){
+      else if(kings[BLACK].test(index)){
         std::cout << "\033[31;1m@\033[0m ";
       }
-      else if(is_king[WHITE].test(index)){
+      else if(kings[WHITE].test(index)){
         std::cout << "\033[34;1m@\033[0m ";
       }
       else{
-        std::cout << "  ";
+        std::cout << "- ";
       }
       index++;
     }
@@ -134,7 +134,7 @@ void board::get_all_children(board* out, int* move_count) const
       out++;
       inspected.reset(index);
     }
-
+    
   }
   else{
     // turn == WHITE
@@ -172,6 +172,59 @@ void board::get_all_children(board* out, int* move_count) const
       inspected.reset(index);
     }
   }
+  
+  // test king moves
+  inspected = kings[turn];
+  while(inspected.any()){
+    int index = find_first_set_64((inspected).to_ulong()) - 1;
+    assert(index != -1);
+    
+    int test_index;
+    
+    
+    /// TODO
+    
+    
+    // test top left
+    test_index = index;
+    while(!(move::border_left | move::border_top | (~empty_fields)).test(test_index)){
+      test_index += (move::is_left.test(test_index) ? (-6) : (-5));
+      *out = *this;
+      out->kings[turn] ^= ((1ul << index) | (1ul << test_index));
+      out++;
+    }
+    
+    // test top right
+    test_index = index;
+    while(!(move::border_right | move::border_top | (~empty_fields)).test(test_index)){
+      test_index += (move::is_left.test(test_index) ? (-5) : (-4));
+      *out = *this;
+      out->kings[turn] ^= ((1ul << index) | (1ul << test_index));
+      out++;
+    }
+
+    // go bottom left
+    test_index = index;
+    while(!(move::border_left | move::border_bottom | (~empty_fields)).test(test_index)){
+      test_index += (move::is_left.test(test_index) ? (4) : (5));
+      *out = *this;
+      out->kings[turn] ^= ((1ul << index) | (1ul << test_index));
+      out++;
+    }
+    
+    // go bottom right
+    test_index = index;
+    while(!(move::border_right | move::border_bottom | (~empty_fields)).test(test_index)){
+      test_index += (move::is_left.test(test_index) ? (5) : (6));
+      *out = *this;
+      out->kings[turn] ^= ((1ul << index) | (1ul << test_index));
+      out++;
+    }
+    
+    inspected.reset(index);
+  }
+  
+  
   
   *move_count = (out-start_out);
 }
