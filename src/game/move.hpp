@@ -8,15 +8,6 @@ enum{
   ROW_R = 0  // refers to rows 1,3,5,7,9
 };
 
-enum{
-  DIR_UL = 0,
-  DIR_UR = 1,
-  DIR_DL = 2,
-  DIR_DR = 3
-};
-
-
-
 // http://dezlaren.home.xs4all.nl/opgaven/BordNummering.gif
 //  EVERYTHING -1 ^^^^
 struct move{
@@ -26,20 +17,18 @@ struct move{
   
   /// all data for BLACK, multiply by (-1) for data on WHITE
   
+  // WARNING: up in index is down on the board !!
+  // bitsets for allowed difference in index to get to a "neighbor field"
+                                // color  left/right
+                                //------------------
+  static std::bitset<50> up4;   // black  left
+  static std::bitset<50> up5;   // black  both
+  static std::bitset<50> up6;   // black  right
+  static std::bitset<50> down4; // white  right
+  static std::bitset<50> down5; // white  both  
+  static std::bitset<50> down6; // white  left
   
-  // contains difference in index of walk in any direction, per row line type
-  // example use: move::diff_walk[is_left.test(0)][DIR_DR];
-  static int diff_walk[2][4];
-  
-  // contains difference in index of capturing in any direction
-  // row line types do not matter
-  static int diff_capture[4];
-  
-  // can i walk in this direction from this field?
-  // example use: move::walk_possible[DIR_UL].test(0)
-  static std::bitset<50> walk_possible[4];
-  
-  
+      
   // initialize all static move values
   static void init();
   

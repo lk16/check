@@ -4,10 +4,10 @@
 #include "game/move.hpp"
 
 
-void run_debug(){
+void testing_area(){
   board b;
   b.reset();
-  b.turn = BLACK;
+  //b.turn = BLACK;
   b.show();
   
   board children[100];
@@ -35,8 +35,8 @@ int main(int argc,char **argv){
   
   if(argc>=2){
     std::string argv1(argv[1]);
-    if(argv1=="debug"){
-      run_debug();
+    if(argv1=="testing"){
+      testing_area();
     }
     else{
       std::cout << "Invalid parameter: " << argv1 << '\n';

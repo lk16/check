@@ -95,47 +95,83 @@ void board::get_max_disc_capture_streak(board* out, int* move_count, int* max_st
 
 void board::get_all_children(board* out, int* move_count) const
 {
-  *move_count = 0;
+  board* start_out = out;
   
-  std::bitset<50> empty_fields = get_empty_fields();
-  std::bitset<50> my_l_discs = discs[turn] & move::is_left;
-  std::bitset<50> my_r_discs = discs[turn] & (~move::is_left);
-  
-  std::bitset<50> move_case[4];
+  const std::bitset<50> empty_fields = get_empty_fields();
+  std::bitset<50> inspected;
   
   if(turn==BLACK){
-    move_case[0] = (my_r_discs & move::walk_possible[DIR_DL] & BIT_SHIFT(empty_fields,-move::diff_walk[0][DIR_DL]));
-    move_case[1] = (my_r_discs & move::walk_possible[DIR_DR] & BIT_SHIFT(empty_fields,-move::diff_walk[0][DIR_DR]));
-    move_case[2] = (my_l_discs & move::walk_possible[DIR_DL] & BIT_SHIFT(empty_fields,-move::diff_walk[1][DIR_DL]));
-    move_case[3] = (my_l_discs & move::walk_possible[DIR_DR] & BIT_SHIFT(empty_fields,-move::diff_walk[1][DIR_DR]));
-  
-    for(int i=0;i<2;i++){
-      while(my_r_discs.any()){
-        int index = find_first_set_64(my_r_discs.to_ulong())-1;
-        assert(index!=-1);
-        out[*move_count] = *this;
-        out[*move_count].discs[turn].flip(index);
-        out[*move_count].discs[turn].flip(index + move::diff_walk[0][i==0 ? DIR_DL : DIR_DR]);         (*move_count)++;
-        my_r_discs.reset(index);
-      }
+    
+    // test up4
+    inspected = discs[BLACK] & move::up4 & (empty_fields >> 4);
+    while(inspected.any()){
+      int index = find_first_set_64((inspected).to_ulong()) - 1;
+      assert(index != -1);
+      *out = *this;
+      out->discs[BLACK] ^= (0x11 << index);
+      out++;
+      inspected.reset(index);
     }
-    for(int i=0;i<2;i++){
-      while(my_l_discs.any()){
-        int index = find_first_set_64(my_l_discs.to_ulong())-1;
-        assert(index!=-1);
-        out[*move_count] = *this;
-        out[*move_count].discs[turn].flip(index);
-        out[*move_count].discs[turn].flip(index + move::diff_walk[1][i==0 ? DIR_DL : DIR_DR]); 
-        (*move_count)++;
-        my_l_discs.reset(index);
-      }
+    
+    // test up5
+    inspected = discs[BLACK] & move::up5 & (empty_fields >> 5);
+    while(inspected.any()){
+      int index = find_first_set_64((inspected).to_ulong()) - 1;
+      assert(index != -1);
+      *out = *this;
+      out->discs[BLACK] ^= (0x21 << index);
+      out++;
+      inspected.reset(index);
     }
+
+    // test up6
+    inspected = discs[BLACK] & move::up6 & (empty_fields >> 6);
+    while(inspected.any()){
+      int index = find_first_set_64((inspected).to_ulong()) - 1;
+      assert(index != -1);
+      *out = *this;
+      out->discs[BLACK] ^= (0x41 << index);
+      out++;
+      inspected.reset(index);
+    }
+
   }
   else{
-    assert(turn==WHITE);
-    move_case[0] = (my_r_discs & move::walk_possible[DIR_UL] & BIT_SHIFT(empty_fields,-move::diff_walk[0][DIR_UL]));
-    move_case[1] = (my_r_discs & move::walk_possible[DIR_UR] & BIT_SHIFT(empty_fields,-move::diff_walk[0][DIR_UR]));
-    move_case[2] = (my_l_discs & move::walk_possible[DIR_UL] & BIT_SHIFT(empty_fields,-move::diff_walk[1][DIR_UL]));
-    move_case[3] = (my_l_discs & move::walk_possible[DIR_UR] & BIT_SHIFT(empty_fields,-move::diff_walk[1][DIR_UR]));
+    // turn == WHITE
+    
+    // test down4
+    inspected = discs[WHITE] & move::down4 & (empty_fields << 4);
+    while(inspected.any()){
+      int index = find_first_set_64((inspected).to_ulong()) - 1;
+      assert(index != -1);
+      *out = *this;
+      out->discs[WHITE] ^= ((1ul << index) | (1ul << (index-4)));
+      out++;
+      inspected.reset(index);
+    }
+    
+    // test down5
+    inspected = discs[WHITE] & move::down5 & (empty_fields << 5);
+    while(inspected.any()){
+      int index = find_first_set_64((inspected).to_ulong()) - 1;
+      assert(index != -1);
+      *out = *this;
+      out->discs[WHITE] ^= ((1ul << index) | (1ul << (index-5)));
+      out++;
+      inspected.reset(index);
+    }
+    
+    // test down6
+    inspected = discs[WHITE] & move::down6 & (empty_fields << 6);
+    while(inspected.any()){
+      int index = find_first_set_64((inspected).to_ulong()) - 1;
+      assert(index != -1);
+      *out = *this;
+      out->discs[WHITE] ^= ((1ul << index) | (1ul << (index-6)));
+      out++;
+      inspected.reset(index);
+    }
   }
+  
+  *move_count = (out-start_out);
 }
