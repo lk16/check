@@ -9,6 +9,11 @@ std::bitset<50> move::down4;
 std::bitset<50> move::down5;
 std::bitset<50> move::down6;
 
+std::bitset<50> move::up9;
+std::bitset<50> move::up11;
+std::bitset<50> move::down9;
+std::bitset<50> move::down11;
+
 std::bitset<50> move::border_left;
 std::bitset<50> move::border_right;
 std::bitset<50> move::border_top;
@@ -26,35 +31,54 @@ void move::init(){
   up5.set();
   down5.set();
   
+  up9.set();
+  up11.set();
+  down9.set();
+  down11.set();
+  
   up4 = down6 = is_left;
   up6 = down4 = ~is_left;
   
   for(int i=0;i<5;i++){
-    
     border_top.set(i);
-    
     border_bottom.set(45+i);
-    
     border_left.set(5+(10*i));
-    
     border_right.set(4+(10*i));
-    
   }
-  down4 &= (~border_top);
-  down4 &= (~border_right);
   
+  down4 &= (~(border_top | border_right));
   down5 &= (~border_top);
+  down6 &= (~(border_top | border_left));
   
-  down6 &= (~border_left);
-  down6 &= (~border_top);
-  
-  up4 &= (~border_bottom);
-  up4 &= (~border_left);
-  
+  up4 &= (~(border_bottom | border_left));
   up5 &= (~border_bottom);
+  up6 &= (~(border_bottom | border_right));
   
-  up6 &= (~border_bottom);
-  up6 &= (~border_right);
+  up11 &= (~(border_left | border_top));
+  up9  &= (~(border_right | border_top));
+  
+  down9  &= (~(border_bottom | border_left));
+  down11 &= (~(border_bottom | border_right));
+  
+  for(int i=0;i<5;i++){
+    up11.reset(5+i);
+    up11.reset(10*i);
+  
+    up9.reset(5+i);
+    up9.reset((10*i)+9);
+    
+    down9.reset(40+i);
+    down9.reset(10*i);
+    
+    down11.reset(40+i);
+    down11.reset((10*i)+9);
+  }
+  
+  
+  
+  
+  
+  
   
   king_dist_diff =
   { 

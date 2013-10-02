@@ -27,6 +27,12 @@ struct move{
   static std::bitset<50> down5; // white  both  
   static std::bitset<50> down6; // white  left
   
+  static std::bitset<50> up9;
+  static std::bitset<50> up11;
+  static std::bitset<50> down9;
+  static std::bitset<50> down11;
+  
+  
   static std::bitset<50> border_top;
   static std::bitset<50> border_bottom;
   static std::bitset<50> border_left;

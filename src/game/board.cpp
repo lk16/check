@@ -88,9 +88,25 @@ void board::get_max_king_capture_streak(board* out, int* move_count, int* max_st
 
 void board::get_max_disc_capture_streak(board* out, int* move_count, int* max_streak) const
 {
-  (void)out;
-  NOT_IMPLEMENTED;
-  *max_streak = *move_count = 0;
+  board* start_out = out;
+  *max_streak = 0;
+  
+  const std::bitset<50> opp_fields = discs[opponent(turn)] | kings[opponent(turn)];
+  const std::bitset<50> empty_fields = get_empty_fields();
+  
+  std::bitset<50> inspected;
+  
+  // test Left Up
+  inspected |= (discs[turn] & move::up11 & (empty_fields << 11) & move::is_left & (opp_fields << 6));
+  inspected |= (discs[turn] & move::up11 & (empty_fields << 11) & (~move::is_left) & (opp_fields << 5));
+  while(inspected.any()){
+    int index = find_first_set_64((inspected).to_ulong()) - 1;
+  }
+  
+  
+  
+  
+  *move_count = (out-start_out);
 }
 
 void board::get_all_children(board* out, int* move_count) const
@@ -179,11 +195,10 @@ void board::get_all_children(board* out, int* move_count) const
     int index = find_first_set_64((inspected).to_ulong()) - 1;
     assert(index != -1);
     
-    int test_index;
     
     for(int d=0;d<4;d++){
       for(int i=0;i<move::king_dist_max[d][index];i++){
-         test_index = index + move::king_dist_diff[move::is_left.test(index) ? 1 : 0][d][i];
+         int test_index = index + move::king_dist_diff[move::is_left.test(index) ? 1 : 0][d][i];
          if(!empty_fields.test(test_index)){
            break;
          }

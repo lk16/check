@@ -6,7 +6,7 @@
 
 void testing_area(){
   board b;
-  //b.reset();
+  b.reset();
   b.turn = BLACK;
   b.kings[BLACK].set(49);
   b.show();
