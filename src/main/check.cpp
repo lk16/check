@@ -8,10 +8,7 @@ void testing_area(){
   board b;
   //b.reset();
   b.turn = BLACK;
-  b.discs[WHITE].set(17);
-  b.kings[BLACK].set(22);
-  
-  
+  b.kings[BLACK].set(49);
   b.show();
   
   board children[100];

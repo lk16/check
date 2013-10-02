@@ -8,6 +8,7 @@ enum{
   ROW_R = 0  // refers to rows 1,3,5,7,9
 };
 
+
 // http://dezlaren.home.xs4all.nl/opgaven/BordNummering.gif
 //  EVERYTHING -1 ^^^^
 struct move{
@@ -31,7 +32,12 @@ struct move{
   static std::bitset<50> border_left;
   static std::bitset<50> border_right;
   
-
+  static int king_dist_max[4][50];
+  
+  // 1st index: is_left ?
+  // 2nd index: direction
+  // 3rd index distance
+  static int king_dist_diff[2][4][9];
 
   // initialize all static move values
   static void init();
