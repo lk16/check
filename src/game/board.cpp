@@ -101,6 +101,12 @@ void board::get_max_disc_capture_streak(board* out, int* move_count, int* max_st
   inspected |= (discs[turn] & move::up11 & (empty_fields << 11) & (~move::is_left) & (opp_fields << 5));
   while(inspected.any()){
     int index = find_first_set_64((inspected).to_ulong()) - 1;
+    assert(index!=-1);
+    *out = *this;
+    out->kings[turn] ^= ((1ul << index) | (1ul << (index-11)));
+    
+    
+    inspected.reset(index);
   }
   
   
