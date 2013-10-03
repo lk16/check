@@ -9,7 +9,7 @@ enum{
 };
 
 
-// http://dezlaren.home.xs4all.nl/opgaven/BordNummering.gif
+//  http://pitkit.files.wordpress.com/2012/11/dambord-nummering4.png
 //  EVERYTHING -1 ^^^^
 struct move{
   

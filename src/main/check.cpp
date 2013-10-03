@@ -6,18 +6,22 @@
 
 void testing_area(){
   board b;
-  b.reset();
+  //b.reset();
   b.turn = BLACK;
-  b.kings[BLACK].set(49);
+  b.kings[BLACK].set(32);
+  b.discs[WHITE].set(27);
+  b.discs[WHITE].set(11);
   b.show();
+  std::cout << " \n   ^^^^^^ \n this is the start state!\n\n\n";
+  
   
   board children[100];
   int child_count;
-  
-  b.get_all_children(children,&child_count);
+  b.get_children(children,&child_count);
   for(int i=0;i<child_count;i++){
     children[i].show();
   }
+  std::cout << "child_count = " << child_count << '\n';
   
   
 }

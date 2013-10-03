@@ -54,24 +54,24 @@ void move::init(){
   up5 &= (~border_bottom);
   up6 &= (~(border_bottom | border_right));
   
-  up11 &= (~(border_left | border_top));
-  up9  &= (~(border_right | border_top));
+  down11 &= (~(border_left  | border_top));
+  down9  &= (~(border_right | border_top));
   
-  down9  &= (~(border_bottom | border_left));
-  down11 &= (~(border_bottom | border_right));
+  up9  &= (~(border_bottom | border_left));
+  up11 &= (~(border_bottom | border_right));
   
   for(int i=0;i<5;i++){
-    up11.reset(5+i);
-    up11.reset(10*i);
+    down11.reset(5+i);
+    down11.reset(10*i);
   
-    up9.reset(5+i);
-    up9.reset((10*i)+9);
+    down9.reset(5+i);
+    down9.reset((10*i)+9);
     
-    down9.reset(40+i);
-    down9.reset(10*i);
+    up9.reset(40+i);
+    up9.reset(10*i);
     
-    down11.reset(40+i);
-    down11.reset((10*i)+9);
+    up11.reset(40+i);
+    up11.reset((10*i)+9);
   }
   
   
