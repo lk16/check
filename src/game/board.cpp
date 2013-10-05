@@ -82,14 +82,14 @@ void board::show() const
   std::cout << "+---------------------+\n";
 }
 
-board* board::get_max_king_capture_streak(board* out_end) const
+board* board::get_max_king_capture_streak(board* out_begin) const
 {
-  board* out_begin = out_end;
+  board* out_end = out_begin;
   color opp = opponent(turn);
   
   std::bitset<50> inspected;
   
-  inspected = kings[turn] & move::is_left;
+  inspected = kings[turn];
   while(inspected.any()){
     int index = find_first_set_64((inspected).to_ulong()) - 1;
     assert(index!=-1);
@@ -97,33 +97,34 @@ board* board::get_max_king_capture_streak(board* out_end) const
     inspected.reset(index);
   }
   
-  int count = out_end-out_begin;
+  int move_count = out_end-out_begin;
   
   
   int fill_count = 0;
-  int opp_field_count = (int)((discs[opp] | kings[opp]).count());
   int max_streak = 0;
-  
-  for(int i=0;i<count;i++){    
-    int streak = opp_field_count - ((out_begin+i)->discs[opp] | (out_begin+i)->kings[opp]).count();
-    if(streak == max_streak){
+    
+  for(int i=0;i<move_count;i++){ 
+    int num_opp_fields = ((out_begin+i)->discs[opp] | (out_begin+i)->kings[opp]).count();
+    if(num_opp_fields < max_streak){
+      max_streak = num_opp_fields;
+      fill_count = 0;
+    }
+    if(num_opp_fields == max_streak){
       *(out_begin+fill_count) = *(out_begin+i);
       fill_count++;
     }
-    else if(streak > max_streak){
-      max_streak = streak;
-      *out_begin = *(out_begin+i);
-      fill_count = 1;
-    }
   }
-  
-  return out_end;
+    
+  return (out_begin+fill_count);
 }
 
-board* board::get_all_successive_king_captures(board* out, int start) const
+board* board::get_all_successive_king_captures(board* out_begin, int start) const
 {
+  assert(kings[turn].test(start));
+  
+  board* out_end = out_begin;
+  
   std::bitset<50> my_fields  = discs[turn] | kings[turn];
-  std::bitset<50> empty_fields = get_empty_fields();
   std::bitset<50> opp_fields = discs[opponent(turn)] | kings[opponent(turn)];
   
   
@@ -132,52 +133,45 @@ board* board::get_all_successive_king_captures(board* out, int start) const
   for(int dir=0;dir<4;dir++){
     
     // make sure we dont capture twice per direction per recursive call
-    bool captured_yet = false;
+    int capturable_field = -1;
     
     
     int step_size = 0;
     while(step_size<move::king_dist_max[dir][start]){
-      const int tested  = start + move::king_dist_diff[is_left][dir][step_size];
+      const int tested = start + move::king_dist_diff[is_left][dir][step_size];
       
-      // bump into one of my own disc
       if(my_fields.test(tested)){
         // can not proceed this direction
         break;
       }
-      
-      // bump into opponent discs
-      // can only capture if (1), (2) AND (3) hold:
-      // (1) disc bumped into is not next to border of board in walking direction
-      // (2) no disc directly behind it
-      // (3) no disc captured yet in this recursive call
-      if(opp_fields.test(tested)
-        && (move::king_dist_max[dir][start]!=(step_size+1)) // condition (1)
-        && (!captured_yet) // condition (3)
-      ){
-        
-        const int king_spot = start + move::king_dist_diff[is_left][dir][step_size+1];
-        
-        
-        // condition (2) does not hold
-        if(!empty_fields.test(king_spot)){
-          // can not proceed this direction
+      else if(opp_fields.test(tested)){
+        if(capturable_field != -1){ 
+          // already found capturable field this dircection for this recursive call
           break;
         }
+        else{ 
+          capturable_field = tested;
+        }
+      }
+      else if(capturable_field != -1){
+        assert(get_empty_fields().test(tested));
+        board child = *this;
+        child.kings[turn] ^= ((1ul << start) | (1ul << tested));
+        child.discs[opponent(turn)].reset(capturable_field);
+        child.kings[opponent(turn)].reset(capturable_field);
+        out_end = child.get_all_successive_king_captures(out_end,tested);
         
-        // we can capture!
-        *out = *this;
-        out->kings[turn] ^= ((1ul << start) | (1ul << king_spot));
-        out->discs[opponent(turn)].reset(tested);
-        out->kings[opponent(turn)].reset(tested);
-        out++;
-        captured_yet = true;
+        // TODO dont add child if above recursive calls added any 
+        *out_end = child;
+        out_end++;
       }
       
-      // try walking one step furthur in same direction
-      step_size = step_size + 1;
+      
+      // try walking one step further in same direction
+      step_size++;
     }
   }
-  return out;
+  return out_end;
 }
 
 
