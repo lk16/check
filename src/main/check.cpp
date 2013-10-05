@@ -12,7 +12,7 @@ void testing_area(){
   b.discs[BLACK].set(7);
   b.show();
   std::cout << " \n   ^^^^^^ \n this is the start state!\n\n\n";
-  
+  std::cout << b.is_valid_move(11,2) << '\n';
   
   board children[100];
   int child_count;

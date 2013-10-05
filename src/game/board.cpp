@@ -19,23 +19,35 @@ bool board::is_valid_move(int from,int to) const
     return false;
   }
   
+  
+  board children[100],after;
+  int child_count;
+  
+  
+  get_children(children,&child_count);
+  do_move(from,to,&after);
+  
+  
+  for(int b=0;b<child_count;b++){
+    if(after == children[b]){
+      return true;
+    }
+  }
+  
+  board children_after[100];
+  int after_child_count;
+  
+  after.get_children(children_after,&after_child_count);
+  
+  
   // test if there is any overlap between
   // - get_children() of *this 
   // - get_children() of *this after doing the move of 'from' to 'to'
   
-  board children_before[100];
-  board children_after[100];
-  board after;
-  int before_move_count,after_move_count;
   
-  
-  get_children(children_before,&before_move_count);
-  do_move(from,to,&after);
-  after.get_children(children_after,&after_move_count);
-  
-  for(int a=0;a<after_move_count;a++){
-    for(int b=0;b<before_move_count;b++){
-      if(children_after[a] == children_before[b]){
+  for(int b=0;b<child_count;b++){
+    for(int a=0;a<after_child_count;a++){
+      if(children_after[a] == children[b]){
         return true;
       }
     }
@@ -64,8 +76,8 @@ void board::do_move(int from,int to, board* out) const
         break;
       case -9:
         assert(move::down9.test(from));
-        out->discs[opp].reset(from + (is_left ? -4 : -5));
-        out->kings[opp].reset(from + (is_left ? -4 : -5));
+        out->discs[opp].reset(from + (is_left ? -5 : -4));
+        out->kings[opp].reset(from + (is_left ? -5 : -4));
         break;
       case 9:
         assert(move::up9.test(from));
@@ -118,7 +130,19 @@ void board::do_move(int from,int to, board* out) const
     out->kings[turn] ^= ((1ul << from) | (1ul << to));
   }
   
-  return;
+    // disc to king promotion
+  std::bitset<50> promoted;
+    
+  promoted = (out->discs[WHITE] & move::border_top);
+  out->discs[WHITE] &= (~promoted);
+  out->kings[WHITE] |= (promoted);
+  
+  promoted = (out->discs[BLACK] & move::border_bottom);
+  out->discs[BLACK] &= (~promoted);
+  out->kings[BLACK] |= (promoted);
+  
+  
+  
 }
 
 
