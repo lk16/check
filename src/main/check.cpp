@@ -7,10 +7,9 @@
 void testing_area(){
   board b;
   //b.reset();
-  b.turn = BLACK;
-  b.kings[BLACK].set(32);
-  b.discs[WHITE].set(27);
+  b.turn = WHITE;
   b.discs[WHITE].set(11);
+  b.discs[BLACK].set(7);
   b.show();
   std::cout << " \n   ^^^^^^ \n this is the start state!\n\n\n";
   

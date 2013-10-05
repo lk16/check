@@ -36,6 +36,21 @@ void board::get_children(board* out_begin,int* move_count) const
     }
   }
   
+  for(board* out_iter=out_begin;out_iter!=out_end;out_iter++){
+    // disc to king promotion
+    std::bitset<50> promoted;
+    
+    promoted = (out_iter->discs[WHITE] & move::border_top);
+    out_iter->discs[WHITE] &= (~promoted);
+    out_iter->kings[WHITE] |= (promoted);
+    
+    promoted = (out_iter->discs[BLACK] & move::border_bottom);
+    out_iter->discs[BLACK] &= (~promoted);
+    out_iter->kings[BLACK] |= (promoted);
+  }
+  
+  
+  
   *move_count = (out_end - out_begin);
 }
 
@@ -97,25 +112,22 @@ board* board::get_max_king_capture_streak(board* out_begin) const
     inspected.reset(index);
   }
   
-  int move_count = out_end-out_begin;
-  
-  
-  int fill_count = 0;
-  int max_streak = 0;
+  board* fill_iter = out_begin;
+  int min_num_opp_fields = 50;
     
-  for(int i=0;i<move_count;i++){ 
-    int num_opp_fields = ((out_begin+i)->discs[opp] | (out_begin+i)->kings[opp]).count();
-    if(num_opp_fields < max_streak){
-      max_streak = num_opp_fields;
-      fill_count = 0;
+  for(board* out_iter=out_begin;out_iter!=out_end;out_iter++){ 
+    int num_opp_fields = (out_iter->discs[opp] | out_iter->kings[opp]).count();
+    if(num_opp_fields < min_num_opp_fields){
+      min_num_opp_fields = num_opp_fields;
+      fill_iter = out_begin;
     }
-    if(num_opp_fields == max_streak){
-      *(out_begin+fill_count) = *(out_begin+i);
-      fill_count++;
+    if(num_opp_fields == min_num_opp_fields){
+      *fill_iter = *out_iter;
+      fill_iter++;
     }
   }
     
-  return (out_begin+fill_count);
+  return fill_iter;
 }
 
 board* board::get_all_successive_king_captures(board* out_begin, int start) const
@@ -204,26 +216,22 @@ board* board::get_max_disc_capture_streak(board* out_end) const
     inspected.reset(index);
   }
   
-  int count = out_end-out_begin;
+  board* fill_iter = out_begin;
+  int min_num_opp_fields = 50;
   
-  int fill_count = 0;
-  int opp_field_count = (int)((discs[opp] | kings[opp]).count());
-  int max_streak = 0;
-  
-  for(int i=0;i<count;i++){    
-    int streak = opp_field_count - ((out_begin+i)->discs[opp] | (out_begin+i)->kings[opp]).count();
-    if(streak == max_streak){
-      *(out_end+fill_count) = *(out_begin+i);
-      fill_count++;
+  for(board* out_iter=out_begin;out_iter!=out_end;out_iter++){ 
+    int num_opp_fields = (out_iter->discs[opp] | out_iter->kings[opp]).count();
+    if(num_opp_fields < min_num_opp_fields){
+      min_num_opp_fields = num_opp_fields;
+      fill_iter = out_begin;
     }
-    else if(streak > max_streak){
-      max_streak = streak;
-      *out_begin = *(out_begin+i);
-      fill_count = 1;
+    if(num_opp_fields == min_num_opp_fields){
+      *fill_iter = *out_iter;
+      fill_iter++;
     }
   }
   
-  return out_end;
+  return fill_iter;
 }
 
 board* board::get_all_successive_disc_captures_left(board* out, int start) const
