@@ -38,6 +38,8 @@ struct move{
   static std::bitset<50> border_left;
   static std::bitset<50> border_right;
   
+  // 1st index: direction
+  // 2nd index: move id
   static int king_dist_max[4][50];
   
   // 1st index: is_left ?

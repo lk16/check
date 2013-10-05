@@ -1,27 +1,125 @@
 #include "board.hpp"
 
-#define BIT_SHIFT(var,shift) (((shift)>0) ? ((var) << (shift)) : ((var) >> (-(shift))))
-
-
 bool board::is_valid_move(int from,int to) const
 { 
-  (void)from;
-  (void)to;
   
+  /// WARNING: NOT TESTED YET
+  
+  int from_type = -1; // 0 -> disc, 1 -> king
+  if(discs[turn].test(from)){
+    from_type = 0;
+  }
+  if(kings[turn].test(from)){
+    from_type = 1;
+  }
+  if(from_type == -1){
+    return false;
+  }
+  if(!get_empty_fields().test(to)){
+    return false;
+  }
+  
+  // test if there is any overlap between
+  // - get_children() of *this 
+  // - get_children() of *this after doing the move of 'from' to 'to'
+  
+  board children_before[100];
+  board children_after[100];
+  board after;
+  int before_move_count,after_move_count;
+  
+  
+  get_children(children_before,&before_move_count);
+  do_move(from,to,&after);
+  after.get_children(children_after,&after_move_count);
+  
+  for(int a=0;a<after_move_count;a++){
+    for(int b=0;b<before_move_count;b++){
+      if(children_after[a] == children_before[b]){
+        return true;
+      }
+    }
+  }
   
   return false;
 }
 
 void board::do_move(int from,int to, board* out) const
 {
+  
+  /// WARNING: NOT TESTED YET
+  
   *out = *this;
-  (void)from;
-  (void)to;
+  
+  bool is_left = move::is_left.test(from);  
+  color opp = opponent(turn);
+  
+  
+  if(discs[turn].test(from)){
+    switch(to-from){
+      case -11:
+        assert(move::down11.test(from));
+        out->discs[opp].reset(from + (is_left ? -6 : -5));
+        out->kings[opp].reset(from + (is_left ? -6 : -5));
+        break;
+      case -9:
+        assert(move::down9.test(from));
+        out->discs[opp].reset(from + (is_left ? -4 : -5));
+        out->kings[opp].reset(from + (is_left ? -4 : -5));
+        break;
+      case 9:
+        assert(move::up9.test(from));
+        out->discs[opp].reset(from + (is_left ? 5 : 4));
+        out->kings[opp].reset(from + (is_left ? 5 : 4));
+        break;
+      case 11:
+        assert(move::up11.test(from));
+        out->discs[opp].reset(from + (is_left ? 6 : 5));
+        out->kings[opp].reset(from + (is_left ? 6 : 5));
+        break;
+      case -6:
+      case -5:
+      case -4:
+      case 4:
+      case 5:
+      case 6:
+        break;
+      default:
+        assert(0);
+        break;        
+    }
+    out->discs[turn] ^= ((1ul << from) | (1ul << to));
+  }
+  else{
+    assert(kings[turn].test(from));
+    int dir = -1;
+    for(int d=0;d<4;d++){
+      for(int i=0;i<9;i++){
+        if(from + move::king_dist_diff[is_left][d][i] == to){
+          dir = d;
+          break;
+        }
+      }
+      if(d!=-1){
+        break;
+      }
+    }
+    
+    for(int i=0;i<move::king_dist_max[dir][from];i++){
+      int tested = from + move::king_dist_diff[is_left][dir][i];
+      if(tested == to){
+        break;
+      }
+      out->discs[opp].reset(tested);
+      out->kings[opp].reset(tested);
+    }
+    
+    
+    out->kings[turn] ^= ((1ul << from) | (1ul << to));
+  }
+  
   return;
 }
-
-
-
 
 
 void board::get_children(board* out_begin,int* move_count) const
@@ -48,8 +146,6 @@ void board::get_children(board* out_begin,int* move_count) const
     out_iter->discs[BLACK] &= (~promoted);
     out_iter->kings[BLACK] |= (promoted);
   }
-  
-  
   
   *move_count = (out_end - out_begin);
 }
