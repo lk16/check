@@ -36,38 +36,54 @@ color game_control::turn() const
 
 void game_control::on_human_click(int field_id)
 {
+  
+  bool first_click = (previous_clicked_field == -1);
+  
   if(bot[turn()]){
     // it's the bots turn! discard click
     return;
   }
-  if(field_id==-1){
-    // this is a yellow field: discard click
-    return;
-  }
-  if(previous_clicked_field==-1){
-    // if this is the fist click
-    if(current.discs[current.turn].test(field_id)){
-      // if this field has a disc of my color
-      previous_clicked_field = field_id;
-    }
-    return;
-  }
-  int from = previous_clicked_field;
-  int to = field_id;
- 
-  // this is the second click
   
-  // is this a valid move?
-  if(current.is_valid_move(from,to)){
-    // yes: do move
-    undo_stack.push(current);
-    current.do_move(from,to,&current);
-    on_any_move();
+  // clicked on a yellow field
+  if(field_id == -1){
+    previous_clicked_field = -1;
+    mw->update_fields();
+    return;
+  }
+  
+  if(first_click){
+    // clicked on empty field or field of opponent
+    previous_clicked_field = field_id;
+    mw->update_fields();
   }
   else{
-    // no: mark this as click as previous_clicked_field
-    previous_clicked_field = field_id;
+    if((current.discs[turn()] | current.kings[turn()]).test(field_id)){
+      previous_clicked_field = field_id;
+      mw->update_fields();
+      return;
+    }
+    
+    int from = previous_clicked_field;
+    int to = field_id;
+    
+    // this is the second click
+    
+    // is this a valid move?
+    if(current.is_valid_move(from,to)){
+      // yes: do move
+      undo_stack.push(current);
+      current.do_move(from,to,&current);
+      on_any_move();
+      previous_clicked_field = -1;
+    }
+    else{
+      previous_clicked_field = field_id;
+    }
+    
+    mw->update_fields();
+    
   }
+  
 }
 
 void game_control::on_bot_do_move()
@@ -97,12 +113,16 @@ void game_control::on_any_move()
   
   mw->update_fields();
   
+  
+  board board_stack[500];
+  
+  
   int move_count;
-  current.get_children(NULL,&move_count);
+  current.get_children(board_stack,&move_count);
   if(move_count==0){
     board copy(current);
     copy.turn = opponent(copy.turn);
-    copy.get_children(NULL,&move_count);
+    copy.get_children(board_stack,&move_count);
     if(move_count!=0){
       current.turn = opponent(turn());
       mw->update_fields();

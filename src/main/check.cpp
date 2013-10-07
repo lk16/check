@@ -6,13 +6,11 @@
 
 void testing_area(){
   board b;
-  //b.reset();
-  b.turn = WHITE;
-  b.discs[WHITE].set(11);
-  b.discs[BLACK].set(7);
-  b.show();
-  std::cout << " \n   ^^^^^^ \n this is the start state!\n\n\n";
-  std::cout << b.is_valid_move(11,2) << '\n';
+  b.reset();
+  b.is_valid_move(25,30);
+  
+  
+  return;
   
   board children[100];
   int child_count;

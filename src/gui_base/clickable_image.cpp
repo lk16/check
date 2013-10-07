@@ -14,8 +14,13 @@ bool clickable_image::on_button_press_event(GdkEventButton* _event)
 {
   (void)_event;
   
-  parent->control.on_human_click(field_id);
   std::cout << "Field " << field_id << " was clicked\n";
+  
+  if(field_id>=-1 && field_id<=50){
+    parent->control.on_human_click(field_id);
+  }
+  
+  
   return true;
 }
 

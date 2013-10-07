@@ -71,10 +71,17 @@ void main_window::init_ui(){
     vbox.pack_start(*menubar,Gtk::PACK_SHRINK);
   }
   
+  int field_id = 0;
   for(int y=0;y<10;y++){ 
     for(int x=0;x<10;x++){
-      fields[x][y]=new clickable_image(this,y*10+x,IMAGE_PATH + "brown.png");
+      bool is_yellow = ((x%2==1) ^ (y%2==0));
+      std::string img_name = is_yellow ? "yellow.png" : "brown.png";
+      
+      fields[x][y] = new clickable_image(this,is_yellow ? -1 : field_id,IMAGE_PATH + img_name);
       table.attach(*fields[x][y],x,x+1,y,y+1);
+      if(!is_yellow){
+        field_id++;
+      }
     }
   }
   
@@ -104,8 +111,8 @@ void main_window::on_menu_game_quit()
 
 main_window::~main_window()
 {
-  for(int y=0;y<8;y++){
-    for(int x=0;x<8;x++){
+  for(int y=0;y<10;y++){
+    for(int x=0;x<10;x++){
       delete fields[x][y];
     }
   }
@@ -163,35 +170,33 @@ void main_window::update_fields()
       if(is_yellow){
         imagefile = "yellow.png";
       }
+      else if(b->discs[WHITE].test(index)){
+        imagefile = "brown_white.png";
+      }
+      else if(b->discs[BLACK].test(index)){
+        imagefile = "brown_black.png";
+      }
+      else if(b->kings[WHITE].test(index)){
+        imagefile = "brown_white_king.png";
+      }
+      else if(b->kings[BLACK].test(index)){
+        imagefile = "brown_black_king.png";
+      }
       else{
-        if(b->discs[WHITE].test(index)){
-          imagefile = "brown_white.png";
-        }
-        else if(b->discs[BLACK].test(index)){
-          imagefile = "brown_black.png";
-        }
-        else if(b->kings[WHITE].test(index)){
-          imagefile = "brown_white_king.png";
-        }
-        else if(b->kings[BLACK].test(index)){
-          imagefile = "brown_black_king.png";
+        if((control.previous_clicked_field != -1) &&
+          b->is_valid_move(control.previous_clicked_field,index)
+        ){
+          imagefile = "brown_move.png";
         }
         else{
           imagefile = "brown_empty.png";
         }
       }
       
-      
-      table.remove(*fields[x][y]);
-      delete fields[x][y];
-      if(is_yellow){
-        fields[x][y] = new clickable_image(this,-1,IMAGE_PATH + imagefile);
-      }
-      else{
-        fields[x][y] = new clickable_image(this,index,IMAGE_PATH + imagefile);
+      fields[x][y]->set(IMAGE_PATH + imagefile);
+      if(!is_yellow){
         index++;
       }
-      table.attach(*fields[x][y],x,x+1,y,y+1);
     }
   }
   table.show_all_children();

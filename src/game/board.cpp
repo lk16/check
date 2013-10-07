@@ -19,38 +19,34 @@ bool board::is_valid_move(int from,int to) const
     return false;
   }
   
-  
-  board children[100],after;
-  int child_count;
-  
-  
-  get_children(children,&child_count);
-  do_move(from,to,&after);
+  board tested;
+  do_move(from,to,&tested);
   
   
-  for(int b=0;b<child_count;b++){
-    if(after == children[b]){
-      return true;
-    }
+  
+  
+  
+ 
+  board begin[100],*end,*iter;
+  
+  
+  end = get_max_king_capture_streak(begin);
+  if(begin != end){
+        
   }
   
-  board children_after[100];
-  int after_child_count;
+  end = get_max_disc_capture_streak(begin);
+  if(begin != end){
+  }
   
-  after.get_children(children_after,&after_child_count);
-  
-  
-  // test if there is any overlap between
-  // - get_children() of *this 
-  // - get_children() of *this after doing the move of 'from' to 'to'
-  
-  
-  for(int b=0;b<child_count;b++){
-    for(int a=0;a<after_child_count;a++){
-      if(children_after[a] == children[b]){
+  end = get_all_children_no_capture(begin);
+  if(begin != end){
+    for(iter=begin;iter!=end;iter++){
+      if(tested == *iter){
         return true;
       }
     }
+   
   }
   
   return false;
@@ -70,22 +66,30 @@ void board::do_move(int from,int to, board* out) const
   if(discs[turn].test(from)){
     switch(to-from){
       case -11:
-        assert(move::down11.test(from));
+        if(!move::down11.test(from)){
+          return;
+        }
         out->discs[opp].reset(from + (is_left ? -6 : -5));
         out->kings[opp].reset(from + (is_left ? -6 : -5));
         break;
       case -9:
-        assert(move::down9.test(from));
-        out->discs[opp].reset(from + (is_left ? -5 : -4));
+        
+        if(!move::down9.test(from)){
+          return;
+        }out->discs[opp].reset(from + (is_left ? -5 : -4));
         out->kings[opp].reset(from + (is_left ? -5 : -4));
         break;
       case 9:
-        assert(move::up9.test(from));
-        out->discs[opp].reset(from + (is_left ? 5 : 4));
+        
+        if(!move::up9.test(from)){
+          return;
+        } out->discs[opp].reset(from + (is_left ? 5 : 4));
         out->kings[opp].reset(from + (is_left ? 5 : 4));
         break;
       case 11:
-        assert(move::up11.test(from));
+        if(!move::up11.test(from)){
+          return;
+        }
         out->discs[opp].reset(from + (is_left ? 6 : 5));
         out->kings[opp].reset(from + (is_left ? 6 : 5));
         break;
@@ -97,13 +101,17 @@ void board::do_move(int from,int to, board* out) const
       case 6:
         break;
       default:
-        assert(0);
+        // this can NEVER be a valid move
+        return;
         break;        
     }
     out->discs[turn] ^= ((1ul << from) | (1ul << to));
+    
   }
   else{
     assert(kings[turn].test(from));
+    
+    // find out walking direction
     int dir = -1;
     for(int d=0;d<4;d++){
       for(int i=0;i<9;i++){
@@ -112,7 +120,7 @@ void board::do_move(int from,int to, board* out) const
           break;
         }
       }
-      if(d!=-1){
+      if(dir!=-1){
         break;
       }
     }
@@ -122,12 +130,21 @@ void board::do_move(int from,int to, board* out) const
       if(tested == to){
         break;
       }
-      out->discs[opp].reset(tested);
-      out->kings[opp].reset(tested);
+      
+      // only one disc can be captured per "move"
+      if(out->discs[opp].test(tested)){
+        out->discs[opp].reset(tested);
+        break;
+      }
+      if(out->kings[opp].test(tested)){
+        out->kings[opp].reset(tested);
+        break;
+      }
     }
     
     
     out->kings[turn] ^= ((1ul << from) | (1ul << to));
+    out->turn = opponent(out->turn);
   }
   
     // disc to king promotion
@@ -140,7 +157,6 @@ void board::do_move(int from,int to, board* out) const
   promoted = (out->discs[BLACK] & move::border_bottom);
   out->discs[BLACK] &= (~promoted);
   out->kings[BLACK] |= (promoted);
-  
   
   
 }
@@ -237,6 +253,7 @@ board* board::get_max_king_capture_streak(board* out_begin) const
     
   for(board* out_iter=out_begin;out_iter!=out_end;out_iter++){ 
     int num_opp_fields = (out_iter->discs[opp] | out_iter->kings[opp]).count();
+    out_iter->switch_turn();
     if(num_opp_fields < min_num_opp_fields){
       min_num_opp_fields = num_opp_fields;
       fill_iter = out_begin;
@@ -340,6 +357,7 @@ board* board::get_max_disc_capture_streak(board* out_end) const
   int min_num_opp_fields = 50;
   
   for(board* out_iter=out_begin;out_iter!=out_end;out_iter++){ 
+    out_iter->switch_turn();
     int num_opp_fields = (out_iter->discs[opp] | out_iter->kings[opp]).count();
     if(num_opp_fields < min_num_opp_fields){
       min_num_opp_fields = num_opp_fields;
@@ -475,6 +493,7 @@ board* board::get_all_children_no_capture(board* out_end) const
       assert(index != -1);
       *out_end = *this;
       out_end->discs[BLACK] ^= (0x11 << index);
+      out_end->switch_turn();
       out_end++;
       inspected.reset(index);
     }
@@ -486,6 +505,7 @@ board* board::get_all_children_no_capture(board* out_end) const
       assert(index != -1);
       *out_end = *this;
       out_end->discs[BLACK] ^= (0x21 << index);
+      out_end->switch_turn();
       out_end++;
       inspected.reset(index);
     }
@@ -497,6 +517,7 @@ board* board::get_all_children_no_capture(board* out_end) const
       assert(index != -1);
       *out_end = *this;
       out_end->discs[BLACK] ^= (0x41 << index);
+      out_end->switch_turn();
       out_end++;
       inspected.reset(index);
     }
@@ -512,6 +533,7 @@ board* board::get_all_children_no_capture(board* out_end) const
       assert(index != -1);
       *out_end = *this;
       out_end->discs[WHITE] ^= ((1ul << index) | (1ul << (index-4)));
+      out_end->switch_turn();
       out_end++;
       inspected.reset(index);
     }
@@ -523,6 +545,7 @@ board* board::get_all_children_no_capture(board* out_end) const
       assert(index != -1);
       *out_end = *this;
       out_end->discs[WHITE] ^= ((1ul << index) | (1ul << (index-5)));
+      out_end->switch_turn();
       out_end++;
       inspected.reset(index);
     }
@@ -534,6 +557,7 @@ board* board::get_all_children_no_capture(board* out_end) const
       assert(index != -1);
       *out_end = *this;
       out_end->discs[WHITE] ^= ((1ul << index) | (1ul << (index-6)));
+      out_end->switch_turn();
       out_end++;
       inspected.reset(index);
     }
@@ -547,13 +571,14 @@ board* board::get_all_children_no_capture(board* out_end) const
     
     for(int d=0;d<4;d++){
       for(int i=0;i<move::king_dist_max[d][index];i++){
-         int test_index = index + move::king_dist_diff[move::is_left.test(index) ? 1 : 0][d][i];
-         if(!empty_fields.test(test_index)){
-           break;
-         }
-         *out_end = *this;
-         out_end->kings[turn] ^= ((1ul << index) | (1ul << test_index));
-         out_end++;
+        int test_index = index + move::king_dist_diff[move::is_left.test(index) ? 1 : 0][d][i];
+        if(!empty_fields.test(test_index)){
+          break;
+        }
+        *out_end = *this;
+        out_end->kings[turn] ^= ((1ul << index) | (1ul << test_index));
+        out_end->switch_turn();
+        out_end++;
       }
     }
     

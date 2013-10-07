@@ -41,6 +41,8 @@ struct board{
   /// performs move for *this and this->turn
   /// might crash if fed an invalid move
   /// WARNING: NOT EFFICIENT
+  /// WARNING: will not perform all captures but at most one
+  
   void do_move(int from,int to, board* out) const;
     
   /// gets all children from this board
@@ -71,7 +73,8 @@ struct board{
   /// returns possibly increased out pointer
   board* get_all_successive_king_captures(board* out,int start) const;
   
-  
+  /// switches the turn
+  void switch_turn();
   
   /// puts ALL children in out
   /// number will contain the number of found boards
@@ -140,6 +143,10 @@ inline std::bitset<50> board::get_empty_fields() const
   return ~(discs[BLACK] | discs[WHITE] | kings[BLACK] | kings[WHITE]);
 }
 
+inline void board::switch_turn()
+{
+  turn = opponent(turn);
+}
 
 
 #endif
